@@ -2,8 +2,7 @@
 
 public static class LogWriter
 {
-    private static readonly string Directory = System.IO.Directory.GetCurrentDirectory();
-    private static readonly string LogFile = "log.txt";
+    private const string LogFile = "log.txt";
 
     public static void Log(Exception exception, string message)
     {
