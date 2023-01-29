@@ -23,11 +23,10 @@ public static class UniversityReportGenerator
 public class UniversityReport
 {
 
-    public HashSet<StudentDetails> Studenci { get; }
-    public string Author { get; }
-    
     [JsonConverter(typeof(DateOnlyJsonConverter))]
     public DateOnly CreatedAt { get; }
+    public string Author { get; }
+    public HashSet<StudentDetails> Studenci { get; }
     
     public HashSet<StudiesSummary> ActiveStudies { get; }
     public UniversityReport(HashSet<StudentDetails> details)
@@ -62,7 +61,7 @@ public class StudiesSummary
 
 public static class JsonReportAdapter
 {
-    public static void Save(UniversityReport report, string targetDirectory)
+    public static void Save(UniversityReport universityReport, string targetDirectory)
     {
         var options = new JsonSerializerOptions
         {
@@ -71,9 +70,21 @@ public static class JsonReportAdapter
             IncludeFields = true,
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         };
+        var report = new Report(universityReport);
         var json = JsonSerializer.Serialize(report, options);
         File.WriteAllText(targetDirectory + "\\result.json", json);
     }
+}
+
+public class Report
+{
+    public Report(UniversityReport uczelnia)
+    {
+        Uczelnia = uczelnia;
+    }
+
+    public UniversityReport Uczelnia { get; }
+
 }
 
 public sealed class DateOnlyJsonConverter : JsonConverter<DateOnly>

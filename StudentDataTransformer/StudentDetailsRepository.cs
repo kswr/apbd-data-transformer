@@ -22,30 +22,18 @@ public static class StudentCsvAdapter
         var lines = File.ReadAllLines(sourceFile);
         foreach (var line in lines)
         {
-            Console.WriteLine(line);
-        }
-        foreach (var line in lines)
-        {
             try
             {
-                Console.WriteLine("Handling");
                 var details = StudentDetails.OfCsv(line);
                 if (!studentDetails.Add(details))
                 {
-                    Console.WriteLine($"Duplicate for {line}");
                     LogWriter.Log($"Duplicate data: {line}");
                 }
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
                 LogWriter.Log(e, $"for record {line}");
             }
-        }
-
-        foreach (var studentDetail in studentDetails)
-        {
-            Console.WriteLine(studentDetail);
         }
         return studentDetails;
     }

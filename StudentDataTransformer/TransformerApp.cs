@@ -14,14 +14,13 @@ public static class TransformerApp
         catch (Exception e)
         {
             LogWriter.Log(e);
-            throw;
         }
     }
 }
 
 public class ProgramArguments
 {
-    private static readonly string JsonFormat = "json";
+    private const string JsonFormat = "json";
 
     public string SourceFile { get; }
 
@@ -48,9 +47,7 @@ public class ProgramArguments
 
     private static string ValidateFile(string path)
     {
-        Console.WriteLine(path);
         var absolutePath = AbsolutePath(path);
-        Console.WriteLine(absolutePath);
         try
         {
             if (File.GetAttributes(absolutePath).HasFlag(FileAttributes.Directory))
