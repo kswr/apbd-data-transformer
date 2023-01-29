@@ -33,8 +33,10 @@ public static class StudentJsonAdapter
     {
         var options = new JsonSerializerOptions
         {
+            Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
             WriteIndented = true,
-            IncludeFields = true
+            IncludeFields = true,
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         };
         var json = JsonSerializer.Serialize(details, options);
         File.WriteAllText(targetDirectory + "\\result.json", json);
@@ -50,7 +52,7 @@ public sealed class DateOnlyJsonConverter : JsonConverter<DateOnly>
 
     public override void Write(Utf8JsonWriter writer, DateOnly value, JsonSerializerOptions options)
     {
-        var isoDate = value.ToString("O");
+        var isoDate = value.ToString("dd.MM.yyyy");
         writer.WriteStringValue(isoDate);
     }
 }
@@ -232,9 +234,11 @@ public class StudiesMode
 {
     private const string FullTimeString = "Dzienne";
     private const string PartTimeString = "Zaoczne";
+    private const string OnLineString = "Internetowe";
 
     private static readonly StudiesMode FullTime = new(FullTimeString);
     private static readonly StudiesMode PartTime = new(PartTimeString);
+    private static readonly StudiesMode OnLine = new(OnLineString);
     
     public string Mode { get; }
 
@@ -249,6 +253,7 @@ public class StudiesMode
         {
             FullTimeString => FullTime,
             PartTimeString => PartTime,
+            OnLineString => OnLine,
             _ => throw new ArgumentException($"Unknown studies mode {mode}")
         };
     }
