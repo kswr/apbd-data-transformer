@@ -31,7 +31,12 @@ public static class StudentJsonAdapter
 {
     public static void Save(HashSet<StudentDetails> details, string targetDirectory)
     {
-        var json = JsonSerializer.Serialize(details);
+        var options = new JsonSerializerOptions
+        {
+            WriteIndented = true,
+            IncludeFields = true
+        };
+        var json = JsonSerializer.Serialize(details, options);
         File.WriteAllText(targetDirectory + "\\result.json", json);
     }
 }
@@ -166,21 +171,32 @@ public class StudentDetails
     {
         return IndexNumber.GetHashCode() * 17 + FName.GetHashCode() * 7 + LName.GetHashCode();
     }
+
+    public override string ToString()
+    {
+        return
+            $"StudentDetails[indexNumber:{IndexNumber}, fName:{FName}, lName:{LName}, birthDate:{Birthdate}, email:{Email}, studies:{Studies}, mothersName:{MothersName}, fathersName:{FathersName}]";
+    }
 }
 
 public class Studies
 {
-    public StudiesName Name { get; }
-    public StudiesMode Mode { get; }
+    public string Name { get; }
+    public string Mode { get; }
 
     private Studies(StudiesName name, StudiesMode mode)
     {
-        Name = name;
-        Mode = mode;
+        Name = name.Name;
+        Mode = mode.Mode;
     }
     public static Studies Of(string name, string mode)
     {
         return new(StudiesName.Of(name), StudiesMode.Of(mode));
+    }
+
+    public override string ToString()
+    {
+        return $"Studies[name: {Name}, mode: {Mode}]";
     }
 }
 
@@ -191,7 +207,7 @@ public class StudiesName
 
     private const string NewMediaArtString = "Sztuka Nowych Mediów";
     private const string ComputerScienceString = "Informatyka";
-    private string Name { get; }
+    public string Name { get; }
 
     private StudiesName(string name)
     {
@@ -208,7 +224,7 @@ public class StudiesName
 
     public override string ToString()
     {
-        return Name;
+        return $"StudiesName:[name: {Name}]";
     }
 }
 
@@ -220,7 +236,7 @@ public class StudiesMode
     private static readonly StudiesMode FullTime = new(FullTimeString);
     private static readonly StudiesMode PartTime = new(PartTimeString);
     
-    private string Mode { get; }
+    public string Mode { get; }
 
     private StudiesMode(string mode)
     {
@@ -239,6 +255,6 @@ public class StudiesMode
 
     public override string ToString()
     {
-        return Mode;
+        return $"StudiesMode[mode:{Mode}";
     }
 }
