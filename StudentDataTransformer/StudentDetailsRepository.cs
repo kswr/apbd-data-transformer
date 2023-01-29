@@ -1,4 +1,5 @@
 ﻿using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 
 namespace StudentDataTransformer;
@@ -12,12 +13,12 @@ public static class StudentDetailsRepository
 
     public static void Save(
         HashSet<StudentDetails> details,
-        string targetFile, 
+        string targetDirectory, 
         string format)
     {
         if ("json".Equals(format))
         {
-            StudentJsonAdapter.Save(details, targetFile);
+            StudentJsonAdapter.Save(details, targetDirectory);
         }
         else
         {
@@ -28,10 +29,24 @@ public static class StudentDetailsRepository
 
 public static class StudentJsonAdapter
 {
-    public static void Save(HashSet<StudentDetails> details, string targetFile)
+    public static void Save(HashSet<StudentDetails> details, string targetDirectory)
     {
         var json = JsonSerializer.Serialize(details);
-        File.WriteAllText(targetFile, json);
+        File.WriteAllText(targetDirectory + "\\result.json", json);
+    }
+}
+
+public sealed class DateOnlyJsonConverter : JsonConverter<DateOnly>
+{
+    public override DateOnly Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    {
+        return DateOnly.FromDateTime(reader.GetDateTime());
+    }
+
+    public override void Write(Utf8JsonWriter writer, DateOnly value, JsonSerializerOptions options)
+    {
+        var isoDate = value.ToString("O");
+        writer.WriteStringValue(isoDate);
     }
 }
 
@@ -43,20 +58,31 @@ public static class StudentCsvAdapter
         var lines = File.ReadAllLines(sourceFile);
         foreach (var line in lines)
         {
+            Console.WriteLine(line);
+        }
+        foreach (var line in lines)
+        {
             try
             {
+                Console.WriteLine("Handling");
                 var details = StudentDetails.OfCsv(line);
                 if (!studentDetails.Add(details))
                 {
+                    Console.WriteLine($"Duplicate for {line}");
                     LogWriter.Log($"Duplicate data: {line}");
                 }
             }
             catch (Exception e)
             {
-                LogWriter.Log(e);
+                Console.WriteLine(e);
+                LogWriter.Log(e, $"for record {line}");
             }
         }
 
+        foreach (var studentDetail in studentDetails)
+        {
+            Console.WriteLine(studentDetail);
+        }
         return studentDetails;
     }
 }
@@ -66,11 +92,13 @@ public class StudentDetails
     public string IndexNumber { get; }
     public string FName { get; }
     public string LName { get; }
-    public DateOnly Birthdate { get; private set; }
-    public string Email { get; private set; }
-    public string MothersName { get; private set; }
-    public string FathersName { get; private set; }
-    public Studies Studies { get; private set; }
+    
+    [JsonConverter(typeof(DateOnlyJsonConverter))]
+    public DateOnly Birthdate { get; private init; }
+    public string Email { get; private init; }
+    public string MothersName { get; private init; }
+    public string FathersName { get; private init; }
+    public Studies Studies { get; private init; }
 
     private StudentDetails(string index, string fName, string lName)
     {
@@ -84,7 +112,7 @@ public class StudentDetails
         var fields = row.Split(",");
         Sanitize(fields);
         if (fields.Length != 9) throw new ArgumentException("Incorrect number of columns in CSV row");
-        var index = Index(fields[5]);
+        var index = Index(fields[4]);
         var fname = Name(fields[0]);
         var lname = Name(fields[1]);
         return new StudentDetails(index, fname, lname)
