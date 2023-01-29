@@ -11,51 +11,8 @@ public static class StudentDetailsRepository
         return StudentCsvAdapter.Read(sourceFile);
     }
 
-    public static void Save(
-        HashSet<StudentDetails> details,
-        string targetDirectory, 
-        string format)
-    {
-        if ("json".Equals(format))
-        {
-            StudentJsonAdapter.Save(details, targetDirectory);
-        }
-        else
-        {
-            LogWriter.Log("Nie znaleziono odpowiedniego formatu docelowego");
-        }
-    }
 }
 
-public static class StudentJsonAdapter
-{
-    public static void Save(HashSet<StudentDetails> details, string targetDirectory)
-    {
-        var options = new JsonSerializerOptions
-        {
-            Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
-            WriteIndented = true,
-            IncludeFields = true,
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-        };
-        var json = JsonSerializer.Serialize(details, options);
-        File.WriteAllText(targetDirectory + "\\result.json", json);
-    }
-}
-
-public sealed class DateOnlyJsonConverter : JsonConverter<DateOnly>
-{
-    public override DateOnly Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-    {
-        return DateOnly.FromDateTime(reader.GetDateTime());
-    }
-
-    public override void Write(Utf8JsonWriter writer, DateOnly value, JsonSerializerOptions options)
-    {
-        var isoDate = value.ToString("dd.MM.yyyy");
-        writer.WriteStringValue(isoDate);
-    }
-}
 
 public static class StudentCsvAdapter
 {

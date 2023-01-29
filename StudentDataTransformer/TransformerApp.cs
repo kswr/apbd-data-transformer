@@ -9,7 +9,7 @@ public static class TransformerApp
         {
             var arguments = new ProgramArguments(args);
             var studentDetails = StudentDetailsRepository.Get(arguments.SourceFile);
-            StudentDetailsRepository.Save(studentDetails, arguments.TargetDirectory, arguments.Format);
+            UniversityReportGenerator.Generate(studentDetails, arguments.TargetDirectory, arguments.Format);
         }
         catch (Exception e)
         {
